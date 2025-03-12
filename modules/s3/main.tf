@@ -3,8 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "bucket-hello-s3-lambda-mouss"
-
+  bucket = "api-node-user"
 }
 
 # Blocage de l'accès public pour le bucket
@@ -26,12 +25,10 @@ resource "aws_s3_bucket_versioning" "my_bucket_versioning" {
   }
 }
 
-
 # Télécharger un fichier vers le bucket S3
 # resource "aws_s3_object" "my_bucket_object" {
 #   bucket = aws_s3_bucket.my_bucket.bucket
-#   key    = "img.png"                                                # Nom du fichier dans le bucket
-#   source = "/Users/moussa/Desktop/terraform-aws/modules/s3/main.tf" # Chemin vers le fichier local que vous voulez télécharger
-#   acl    = "private"                                                # Par défaut, l'accès au fichier est privé
+#   key    = "lambda-nodejs.zip"
+#   source = "/Users/moussa/Desktop/terraform-aws/modules/s3/main.tf"
+#   acl    = "private"
 # }
-
