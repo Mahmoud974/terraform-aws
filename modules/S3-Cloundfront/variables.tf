@@ -1,11 +1,11 @@
 variable "aws_region" {
-  description = "La région AWS dans laquelle déployer les ressources"
+  description = "Région AWS"
   type        = string
   default     = "eu-west-3"
 }
 
-variable "bucket_name" {
-  description = "Nom du bucket S3 qui contiendra les images"
+variable "s3_bucket_name" {
+  description = "Nom du bucket S3"
   type        = string
-  default     = "list-desserts-nextjs-port" #  
+  default     = "prod-list-desserts"
 }

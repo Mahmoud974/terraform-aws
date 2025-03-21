@@ -1,54 +1,41 @@
-# Création du bucket S3 pour les images
+provider "aws" {
+  region = var.aws_region
+}
+
 resource "aws_s3_bucket" "images" {
-  bucket = var.bucket_name
-  acl    = "private"
+  bucket = var.s3_bucket_name
 }
 
-# Politique pour permettre à CloudFront d’accéder au bucket via une Origin Access Identity (OAI)
-resource "aws_s3_bucket_policy" "images_policy" {
-  bucket = aws_s3_bucket.images.id
-  policy = data.aws_iam_policy_document.images_bucket_policy.json
+resource "aws_s3_bucket_public_access_block" "images" {
+  bucket                  = aws_s3_bucket.images.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-data "aws_iam_policy_document" "images_bucket_policy" {
-  statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.images.arn}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.oai.iam_arn]
-    }
-  }
+resource "aws_cloudfront_origin_access_control" "oac" {
+  name                              = "s3-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
-# Création de l’Origin Access Identity pour CloudFront
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI pour accéder au bucket S3 des images"
-}
-
-# Création de la distribution CloudFront
 resource "aws_cloudfront_distribution" "cdn" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = "Distribution CloudFront pour diffuser les images"
-  default_root_object = "index.html" # à ajuster selon vos besoins
-
   origin {
-    domain_name = aws_s3_bucket.images.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.images.id}"
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
-    }
+    domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+    origin_id                = "s3_origin"
   }
+
+  enabled             = true
+  default_root_object = "index.html"
 
   default_cache_behavior {
-    target_origin_id       = "S3-${aws_s3_bucket.images.id}"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-
+    target_origin_id       = "s3_origin"
     forwarded_values {
       query_string = false
       cookies {
@@ -68,13 +55,43 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 }
 
-# Upload des images depuis le dossier local vers le "dossier" dans S3
-resource "aws_s3_object" "images" {
-  for_each = fileset("./images", "*")
-
-  bucket = aws_s3_bucket.images.bucket
-  key    = "images/${each.value}"
-  source = "images/${each.value}"
-
+resource "aws_s3_bucket_policy" "images" {
+  bucket = aws_s3_bucket.images.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "arn:aws:s3:::${var.s3_bucket_name}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.cdn.arn
+          }
+        }
+      }
+    ]
+  })
+  depends_on = [aws_cloudfront_distribution.cdn]
 }
+
+resource "aws_s3_object" "images" {
+  for_each = fileset("images/", "*")
+
+  bucket = aws_s3_bucket.images.id
+  key    = each.value
+  source = "images/${each.value}"
+  content_type = lookup({
+    jpg  = "image/jpeg"
+    jpeg = "image/jpeg"
+    png  = "image/png"
+  }, split(".", each.value)[length(split(".", each.value)) - 1], "application/octet-stream")
+
+  depends_on = [aws_s3_bucket_policy.images]
+}
+
+
 
