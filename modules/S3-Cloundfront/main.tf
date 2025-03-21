@@ -1,7 +1,7 @@
 # Création du bucket S3 pour les images
 resource "aws_s3_bucket" "images" {
   bucket = var.bucket_name
-
+  acl    = "private"
 }
 
 # Politique pour permettre à CloudFront d’accéder au bucket via une Origin Access Identity (OAI)
@@ -75,6 +75,6 @@ resource "aws_s3_object" "images" {
   bucket = aws_s3_bucket.images.bucket
   key    = "images/${each.value}"
   source = "images/${each.value}"
-  acl    = "public-read"
+
 }
 
