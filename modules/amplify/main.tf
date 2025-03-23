@@ -6,7 +6,7 @@ provider "aws" {
 resource "aws_amplify_app" "amplify_app" {
   name        = var.amplify_app_name
   repository  = var.git_repository_url
-  oauth_token = "YOUR_GITHUB_OAUTH_TOKEN"
+  oauth_token = "PUT_OAUTH"
 
   environment_variables = {
     NODE_ENV = "production"
@@ -32,6 +32,6 @@ resource "aws_amplify_domain_association" "amplify_domain" {
   # Pour associer un sous-domaine, tu spécifies le nom de la branche dans "sub_domain"
   sub_domain {
     branch_name = aws_amplify_branch.amplify_branch.branch_name
-    prefix      = "www" # Le préfixe "www" ou tout autre préfixe que tu souhaites
+    prefix      = "www"
   }
 }
