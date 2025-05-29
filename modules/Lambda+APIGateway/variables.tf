@@ -1,13 +1,14 @@
+# Variables Terraform
 variable "lambda_function_name" {
   description = "Nom de la fonction Lambda"
   type        = string
-  default     = "prod-dessert_lambda"
+  default     = "prod-ticket-generator-lambda"
 }
 
 variable "api_gateway_name" {
   description = "Nom de l'API Gateway"
   type        = string
-  default     = "prod-dessert-api"
+  default     = "prod-ticket-generator-api"
 }
 
 variable "region" {

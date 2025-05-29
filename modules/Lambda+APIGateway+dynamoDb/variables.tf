@@ -1,13 +1,13 @@
 variable "lambda_function_name" {
   description = "Nom de la fonction Lambda"
   type        = string
-  default     = "prod-ticket-generator-lambda"
+  default     = "royal-food-prod"
 }
 
 variable "api_gateway_name" {
   description = "Nom de l'API Gateway"
   type        = string
-  default     = "prod-ticket-generator-api"
+  default     = "royal-food-prod-api"
 }
 
 variable "region" {
@@ -19,5 +19,5 @@ variable "region" {
 variable "lambda_execution_role_name" {
   description = "Nom du rôle IAM pour Lambda"
   type        = string
-  default     = "lambda_execution_role"
+  default     = "lambda_execution_role-royal"
 }

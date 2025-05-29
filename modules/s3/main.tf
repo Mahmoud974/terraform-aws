@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "api-node-user"
+  bucket = "royal-valence-db-csv"
 }
 
 # Blocage de l'accès public pour le bucket

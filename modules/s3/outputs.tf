@@ -9,10 +9,6 @@ output "bucket_url" {
   value       = "https://${aws_s3_bucket.my_bucket.bucket}.s3.amazonaws.com"
 }
 
-output "object_key" {
-  description = "Le nom de l'objet dans le bucket"
-  value       = aws_s3_object.my_bucket_object.key
-}
 
 output "versioning_status" {
   description = "Statut de la gestion des versions du bucket"
